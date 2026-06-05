@@ -1,49 +1,36 @@
-const express = require("express");
-const cors = require("cors");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+async function sendMessage() {
 
-const app = express();
+    const input = document.getElementById("msg");
+    const chat = document.getElementById("chat");
 
-app.use(cors());
-app.use(express.json());
+    const question = input.value;
 
-// Serve frontend files
-app.use(express.static(__dirname));
+    if (!question) return;
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    chat.innerHTML += `<div><b>You:</b> ${question}</div>`;
 
-// Home page
-app.get("/", (req, res) => {
-    res.sendFile(__dirname + "/INDEX.html");
-});
+    input.value = "";
 
-// AI endpoint
-app.post("/ask", async (req, res) => {
     try {
-        const question = req.body.question;
 
-        const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash"
+        const response = await fetch("/ask", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                question: question
+            })
         });
 
-        const result = await model.generateContent(question);
-        const response = result.response.text();
+        const data = await response.json();
 
-        res.json({
-            answer: response
-        });
+        chat.innerHTML += `<div><b>AI:</b> ${data.answer}</div>`;
 
     } catch (error) {
+
+        chat.innerHTML += `<div><b>AI:</b> Error connecting to server.</div>`;
+
         console.error(error);
-
-        res.status(500).json({
-            answer: "Server Error"
-        });
     }
-});
-
-const PORT = process.env.PORT || 10000;
-
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+}
