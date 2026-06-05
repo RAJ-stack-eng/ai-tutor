@@ -1,94 +1,49 @@
-async function sendMessage() {
+const express = require("express");
+const cors = require("cors");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-    let text = document.getElementById("msg").value.trim();
+const app = express();
 
-    if (text === "") return;
+app.use(cors());
+app.use(express.json());
 
-    let chat = document.getElementById("chat");
+// Serve frontend files
+app.use(express.static(__dirname));
 
-    const userTime = new Date().toLocaleTimeString();
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-    // User message
-    chat.innerHTML += `
-        <div class="user">
-            <span>${text}</span><br>
-            <small>${userTime}</small>
-        </div>
-    `;
+// Home page
+app.get("/", (req, res) => {
+    res.sendFile(__dirname + "/INDEX.html");
+});
 
-    document.getElementById("msg").value = "";
-
-    // Loading message
-    const loadingDiv = document.createElement("div");
-    loadingDiv.className = "ai";
-    loadingDiv.id = "loading";
-    loadingDiv.textContent = "Thinking...";
-    chat.appendChild(loadingDiv);
-
-    chat.scrollTop = chat.scrollHeight;
-
+// AI endpoint
+app.post("/ask", async (req, res) => {
     try {
+        const question = req.body.question;
 
-        const response = await fetch("http://localhost:3000/ask", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                question: text
-            })
+        const model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash"
         });
 
-        const data = await response.json();
+        const result = await model.generateContent(question);
+        const response = result.response.text();
 
-        // Remove loading message
-        document.getElementById("loading")?.remove();
-
-        const aiTime = new Date().toLocaleTimeString();
-
-        // AI message
-        const aiDiv = document.createElement("div");
-        aiDiv.className = "ai";
-
-        const answer = document.createElement("pre");
-        answer.textContent = data.answer;
-
-        const time = document.createElement("small");
-        time.textContent = aiTime;
-
-        aiDiv.appendChild(answer);
-        aiDiv.appendChild(time);
-
-        chat.appendChild(aiDiv);
+        res.json({
+            answer: response
+        });
 
     } catch (error) {
-
-        document.getElementById("loading")?.remove();
-
-        chat.innerHTML += `
-            <div class="ai">
-                <span>Server not running!</span>
-            </div>
-        `;
-
         console.error(error);
+
+        res.status(500).json({
+            answer: "Server Error"
+        });
     }
+});
 
-    chat.scrollTop = chat.scrollHeight;
-}
+const PORT = process.env.PORT || 10000;
 
-// Enter key support
-document.addEventListener("DOMContentLoaded", () => {
-
-    const input = document.getElementById("msg");
-
-    input.addEventListener("keydown", function(event) {
-
-        if (event.key === "Enter") {
-            event.preventDefault();
-            sendMessage();
-        }
-
-    });
-
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });

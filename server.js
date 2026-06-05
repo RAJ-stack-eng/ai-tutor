@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
@@ -8,15 +7,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve HTML, CSS, JS files
+// Serve frontend files
 app.use(express.static(__dirname));
 
-// Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Home page
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "INDEX.html"));
+    res.sendFile(__dirname + "/INDEX.html");
 });
 
 // AI endpoint
@@ -29,22 +27,21 @@ app.post("/ask", async (req, res) => {
         });
 
         const result = await model.generateContent(question);
-        const answer = result.response.text();
+        const response = result.response.text();
 
         res.json({
-            answer: answer
+            answer: response
         });
 
     } catch (error) {
         console.error(error);
 
         res.status(500).json({
-            answer: "Error generating response."
+            answer: "Server Error"
         });
     }
 });
 
-// Render Port
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
