@@ -13,24 +13,34 @@ async function sendMessage() {
 
     try {
 
-        const response = await fetch("/ask", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                question: question
-            })
-        });
+        console.log("Sending:", question);
+
+        const response = await fetch(
+            "https://ai-hub-of-gen-z.onrender.com/ask",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    question: question
+                })
+            }
+        );
+
+        console.log("Status:", response.status);
 
         const data = await response.json();
+
+        console.log("Response:", data);
 
         chat.innerHTML += `<div><b>AI:</b> ${data.answer}</div>`;
 
     } catch (error) {
 
-        console.error(error);
+        console.error("Fetch Error:", error);
 
-        chat.innerHTML += `<div><b>AI:</b> Error connecting to server.</div>`;
+        chat.innerHTML +=
+            `<div><b>AI:</b> Error connecting to server.</div>`;
     }
 }
