@@ -13,34 +13,42 @@ async function sendMessage() {
 
     try {
 
-        console.log("Sending:", question);
-
-        const response = await fetch(
-            "https://ai-hub-of-gen-z.onrender.com/ask",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    question: question
-                })
-            }
-        );
-
-        console.log("Status:", response.status);
+        const response = await fetch("/ask", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                question: question
+            })
+        });
 
         const data = await response.json();
 
-        console.log("Response:", data);
-
         chat.innerHTML += `<div><b>AI:</b> ${data.answer}</div>`;
+
+        chat.scrollTop = chat.scrollHeight;
 
     } catch (error) {
 
-        console.error("Fetch Error:", error);
+        chat.innerHTML += `<div><b>AI:</b> Error connecting to server.</div>`;
 
-        chat.innerHTML +=
-            `<div><b>AI:</b> Error connecting to server.</div>`;
+        console.error(error);
     }
 }
+
+// Enter key support
+document.addEventListener("DOMContentLoaded", () => {
+
+    const input = document.getElementById("msg");
+
+    input.addEventListener("keypress", function(event) {
+
+        if (event.key === "Enter") {
+            event.preventDefault();
+            sendMessage();
+        }
+
+    });
+
+});
