@@ -91,3 +91,25 @@ button{
 button:hover{
     background:#1d4ed8;
 }
+#chat{
+    height:400px;
+    overflow-y:auto;
+    margin-bottom:20px;
+    padding:10px;
+}
+
+.user-msg{
+    background:#2d6cdf;
+    color:white;
+    padding:10px;
+    margin:10px 0;
+    border-radius:10px;
+}
+
+.ai-msg{
+    background:#ffffff;
+    color:black;
+    padding:10px;
+    margin:10px 0;
+    border-radius:10px;
+}

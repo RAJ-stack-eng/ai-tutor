@@ -7,9 +7,25 @@ async function sendMessage() {
 
     if (!question) return;
 
-    chat.innerHTML += `<div><b>You:</b> ${question}</div>`;
+    // Show user message
+    chat.innerHTML += `
+        <div class="user-msg">
+            <b>You:</b> ${question}
+        </div>
+    `;
 
     input.value = "";
+
+    // Loading message
+    const loadingId = "load-" + Date.now();
+
+    chat.innerHTML += `
+        <div id="${loadingId}" class="ai-msg">
+            <b>AI:</b> Thinking...
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
 
     try {
 
@@ -25,30 +41,25 @@ async function sendMessage() {
 
         const data = await response.json();
 
-        chat.innerHTML += `<div><b>AI:</b> ${data.answer}</div>`;
+        document.getElementById(loadingId).innerHTML = `
+            <b>AI:</b><br><br>
+            ${data.answer.replace(/\n/g, "<br>")}
+        `;
 
         chat.scrollTop = chat.scrollHeight;
 
     } catch (error) {
 
-        chat.innerHTML += `<div><b>AI:</b> Error connecting to server.</div>`;
+        document.getElementById(loadingId).innerHTML =
+            "<b>AI:</b> Error connecting to server.";
 
         console.error(error);
     }
 }
 
 // Enter key support
-document.addEventListener("DOMContentLoaded", () => {
-
-    const input = document.getElementById("msg");
-
-    input.addEventListener("keypress", function(event) {
-
-        if (event.key === "Enter") {
-            event.preventDefault();
-            sendMessage();
-        }
-
-    });
-
+document.getElementById("msg").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        sendMessage();
+    }
 });
