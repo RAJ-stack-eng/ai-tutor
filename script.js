@@ -3,7 +3,7 @@ async function sendMessage() {
     const input = document.getElementById("msg");
     const chat = document.getElementById("chat");
 
-    const question = input.value;
+    const question = input.value.trim();
 
     if (!question) return;
 
@@ -29,8 +29,8 @@ async function sendMessage() {
 
     } catch (error) {
 
-        chat.innerHTML += `<div><b>AI:</b> Error connecting to server.</div>`;
-
         console.error(error);
+
+        chat.innerHTML += `<div><b>AI:</b> Error connecting to server.</div>`;
     }
 }
